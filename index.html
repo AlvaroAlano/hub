@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ConvCard Hub | Suporte</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="apple-touch-icon" href="apple-icon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
@@ -2050,6 +2053,27 @@
             clearInterval(gameInterval);
             gameInterval = setInterval(draw, 100); // Velocidade
         }
+
+        // Registro do Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registrado!', reg))
+                    .catch(err => console.log('Erro no Service Worker', err));
+            });
+        }
+
+        // Atalho de teclado para a Busca Global (CTRL+K)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('globalSearch');
+                searchInput.focus();
+                // Opcional: Rolar a página para o topo ao focar na busca
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
     </script>
 </body>
 
