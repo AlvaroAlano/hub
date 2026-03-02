@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConvCard Hub | Suporte</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://www.convcard.com.br/sgc/favicon.ico">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        dark: { bg: '#0f172a', surface: '#1e293b', border: '#334155' }
+                    },
+                    boxShadow: {
+                        'glow': '0 0 20px rgba(14, 165, 233, 0.15)',
+                        'fintech': '0 4px 20px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Scrollbar Personalizada */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* --- EFEITO 3D NOS CARDS (MANTIDO) --- */
+        .searchable-item {
+            transition: all 0.1s ease;
+            position: relative;
+            z-index: 1;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .searchable-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 0.75rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .searchable-item:hover::before {
+            opacity: 1;
+        }
+
+        /* --- NOVO ESTILO DO WIDGET SNAKE --- */
+        #snakeWidget {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Efeito de brilho neon no canvas */
+        canvas {
+            image-rendering: pixelated;
+            /* Deixa os pixels bem definidos */
+        }
+
+        .dark canvas {
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.2), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #1e293b;
+        }
+
+        /* --- ESTILOS DO JOGO DA COBRINHA --- */
+        #snakeModal {
+            backdrop-filter: blur(5px);
+        }
+
+        canvas {
+            box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Hover Geral: Sobe o elemento */
+        .searchable-item:hover {
+            transform: translateY(-4px);
+            z-index: 10;
+        }
+
+        /* Hover Light: Sombra difusa */
+        html:not(.dark) .searchable-item:hover {
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.15);
+            border-color: #cbd5e1;
+        }
+
+        /* Hover Dark: Iluminação e Contraste */
+        .dark .searchable-item:hover {
+            background-color: #27354d !important;
+            /* Highlight no fundo */
+            border-color: #475569 !important;
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Tooltip */
+        .tooltip-text {
+            visibility: hidden;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: #fff;
+            text-align: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            white-space: normal;
+            min-width: 200px;
+            max-width: 250px;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 8px;
+            border: 1px solid #334155;
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        .group:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .app-logo {
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        /* Accordion Animation */
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details>summary {
+            list-style: none;
+        }
+
+        details[open] summary~* {
+            animation: sweep .3s ease-in-out;
+        }
+
+        @keyframes sweep {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px)
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gradient-to-br from-slate-50 via-slate-50 to-slate-200 dark:from-dark-bg dark:to-[#0b1120] text-slate-800 dark:text-slate-200 flex h-screen overflow-hidden selection:bg-brand-500 selection:text-white">
+
+    <aside
+        class="w-20 md:w-72 bg-white/70 dark:bg-dark-surface/80 backdrop-blur-xl border-r border-slate-200/60 dark:border-dark-border flex flex-col justify-between z-30 shadow-fintech transition-all duration-300">
+        <div>
+            <div
+                class="h-28 flex items-center justify-center border-b border-slate-100/50 dark:border-dark-border/50 px-6 relative">
+                <div
+                    class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand-50/50 to-transparent dark:from-brand-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                </div>
+
+                <div
+                    class="w-full flex items-center justify-center relative z-10 transform transition-transform duration-300 hover:scale-105">
+                    <a href="#" class="block">
+                        <img src="https://convc.link/PRbma" alt="Logo Light"
+                            class="h-16 w-auto block dark:hidden object-contain">
+                        <img src="https://convc.link/vSeIS" alt="Logo Dark"
+                            class="h-16 w-auto hidden dark:block object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.15)]">
+                    </a>
+                </div>
+            </div>
+
+            <nav class="mt-8 px-4 space-y-2">
+                <a href="#knowledge"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-brand-600 dark:hover:text-brand-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-book-open w-5 text-center transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-3 text-slate-400 group-hover:text-brand-500"></i>
+                    <span class="hidden md:block">Tutoriais</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#parametros"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-pink-600 dark:hover:text-pink-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-sliders w-5 text-center transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6 text-slate-400 group-hover:text-pink-500"></i>
+                    <span class="hidden md:block">Parâmetros</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-pink-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#ferramentas"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-orange-600 dark:hover:text-orange-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-toolbox w-5 text-center transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 text-slate-400 group-hover:text-orange-500"></i>
+                    <span class="hidden md:block">Diário</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-orange-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#ambientes"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-green-600 dark:hover:text-green-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-network-wired w-5 text-center transition-transform duration-200 group-hover:scale-110 text-slate-400 group-hover:text-green-500"></i>
+                    <span class="hidden md:block">Ambientes</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-green-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#downloads"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-sky-600 dark:hover:text-sky-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-cloud-arrow-down w-5 text-center transition-transform duration-200 group-hover:scale-110 group-hover:translate-y-0.5 text-slate-400 group-hover:text-sky-500"></i>
+                    <span class="hidden md:block">Repo /pub</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-sky-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#softwares"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-laptop-file w-5 text-center transition-transform duration-200 group-hover:scale-110 text-slate-400 group-hover:text-indigo-500"></i>
+                    <span class="hidden md:block">Softwares</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+
+                <a href="#contatos"
+                    class="relative px-4 py-3.5 flex items-center space-x-3 rounded-xl text-slate-600 dark:text-slate-300 font-medium hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-white/5 transition-all duration-200 group overflow-hidden">
+                    <i
+                        class="fa-solid fa-address-book w-5 text-center transition-transform duration-200 group-hover:scale-110 text-slate-400 group-hover:text-red-500"></i>
+                    <span class="hidden md:block">Contatos</span>
+                    <div
+                        class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-red-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    </div>
+                </a>
+            </nav>
+        </div>
+
+        <div
+            class="p-6 border-t border-slate-100 dark:border-dark-border/50 bg-white/50 dark:bg-dark-surface/50 backdrop-blur-sm">
+            <button onclick="document.documentElement.classList.toggle('dark')"
+                class="w-full flex items-center justify-center md:justify-between px-4 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-brand-300 dark:hover:border-brand-700 transition-all duration-200 group">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-yellow-400 transition-colors group-hover:bg-brand-50 dark:group-hover:bg-slate-600">
+                        <i class="fa-solid fa-moon dark:hidden group-hover:text-brand-600"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline"></i>
+                    </div>
+                    <span
+                        class="hidden md:block text-sm font-semibold text-slate-600 dark:text-slate-200 group-hover:text-brand-600 dark:group-hover:text-white">Alterar
+                        Tema</span>
+                </div>
+                <i
+                    class="fa-solid fa-chevron-right text-xs text-slate-300 dark:text-slate-600 hidden md:block group-hover:translate-x-1 transition-transform"></i>
+            </button>
+            <div class="mt-4 text-center hidden md:block">
+                <p id="versionTrigger"
+                    class="text-[10px] text-slate-400 uppercase tracking-widest font-bold cursor-pointer hover:text-brand-500 select-none transition-colors"
+                    title="Clique 3x para uma surpresa">Versão 3.2.0</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto relative scroll-smooth">
+        <div
+            class="sticky top-0 bg-white/70 dark:bg-dark-bg/70 backdrop-blur-2xl z-10 px-8 py-5 border-b border-slate-200/50 dark:border-dark-border/50 flex justify-between items-center gap-4 transition-all duration-300">
+            <div class="relative w-full max-w-2xl"><i
+                    class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i><input type="text"
+                    id="globalSearch" onkeyup="filterCards()"
+                    placeholder="Buscar Postman, FileZilla, Ambientes... (CTRL+K)"
+                    class="w-full bg-white/60 dark:bg-dark-surface/60 border border-slate-200 dark:border-dark-border rounded-xl pl-11 pr-4 py-3 shadow-sm focus:ring-2 focus:ring-brand-500 outline-none transition-all hover:bg-white dark:hover:bg-dark-surface placeholder:text-slate-400">
+            </div>
+            <div
+                class="flex items-center gap-3 bg-white/60 dark:bg-dark-surface/60 p-2 rounded-xl border border-slate-200 dark:border-dark-border shadow-sm backdrop-blur-md">
+                <a href="https://chatgpt.com" target="_blank" title="ChatGPT"
+                    class="hover:scale-110 transition-transform"><img
+                        src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=128"
+                        class="w-6 h-6 rounded-full"></a>
+                <a href="https://gemini.google.com" target="_blank" title="Gemini"
+                    class="hover:scale-110 transition-transform"><img
+                        src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=128"
+                        class="w-6 h-6 rounded-full"></a>
+                <a href="https://copilot.microsoft.com" target="_blank" title="Microsoft Copilot"
+                    class="hover:scale-110 transition-transform"><img
+                        src="https://www.google.com/s2/favicons?domain=microsoft.com&sz=128"
+                        class="w-6 h-6 rounded-full"></a>
+                <a href="https://claude.ai" target="_blank" title="Claude AI"
+                    class="hover:scale-110 transition-transform"><img
+                        src="https://www.google.com/s2/favicons?domain=claude.ai&sz=128"
+                        class="w-6 h-6 rounded-full"></a>
+                <div class="w-px h-6 bg-slate-200 dark:border-dark-border mx-1"></div>
+                <a href="https://web.whatsapp.com" target="_blank" title="WhatsApp Web"
+                    class="hover:scale-110 transition-transform"><img
+                        src="https://www.google.com/s2/favicons?domain=whatsapp.com&sz=128"
+                        class="w-6 h-6 rounded-full"></a>
+            </div>
+        </div>
+
+        <div class="px-8 py-8 max-w-7xl mx-auto space-y-12">
+
+<section id="knowledge">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-book-open text-brand-600"></i> Base de Conhecimento</h2>
+                <div class="space-y-4">
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-user-minus"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Exclusão de
+                                        Funcionários (cad_947)</h4>
+                                    <p class="text-xs text-slate-500">Remover funcionários sem movimentação.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-6">
+                            <div>
+                                <p class="mb-2">Está disponível no módulo <code
+                                        class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-xs">/adm/cad_947</code>
+                                    a tela que permite realizar a exclusão de funcionários sem movimentação.</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">A exclusão pode ser realizada
+                                    utilizando filtros de Administradora, Conveniada, intervalo de códigos ou pela opção
+                                    "Informar funcionários por código".</p>
+                            </div>
+                            <div
+                                class="bg-white dark:bg-dark-surface p-4 rounded border border-slate-200 dark:border-dark-border">
+                                <strong class="block mb-3 text-xs uppercase text-slate-500 tracking-wider">Formato para
+                                    informar códigos</strong>
+                                <div class="mb-4"><span
+                                        class="text-xs font-bold text-slate-700 dark:text-slate-200">Exemplos:</span><code
+                                        class="block mt-1 bg-slate-100 dark:bg-slate-800 p-2 rounded text-xs font-mono text-blue-600 dark:text-blue-400">1, 1-1, 2-0</code>
+                                </div><strong
+                                    class="block mb-2 text-xs font-bold text-slate-700 dark:text-slate-300">Regras de
+                                    Interpretação:</strong>
+                                <ul
+                                    class="list-disc list-inside text-xs space-y-2 text-slate-600 dark:text-slate-400 mb-4">
+                                    <li><strong>Código sem "-x" (ex: 1):</strong> Sistema considera como <span
+                                            class="font-mono">1-0</span> (Titular).</li>
+                                    <li><strong>Código com "-x" (ex: 1-1):</strong> Número antes do hífen é o Titular.
+                                        Número após é o <span class="font-mono">cod_seqfunc</span> do dependente.</li>
+                                    <li><strong>Valor -0:</strong> Sempre representa o titular.</li>
+                                </ul>
+                                <div
+                                    class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded border border-blue-100 dark:border-blue-900/30">
+                                    <strong class="block mb-1 text-xs text-blue-700 dark:text-blue-300">Exemplos
+                                        Práticos:</strong>
+                                    <ul class="text-xs font-mono text-blue-600 dark:text-blue-400 space-y-1">
+                                        <li>1 &rarr; Titular 1 (1-0)</li>
+                                        <li>1-1 &rarr; Titular 1, Dependente 1</li>
+                                        <li>2-0 &rarr; Titular 2</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div><strong class="block mb-2 text-slate-900 dark:text-white">Seleção de
+                                    Funcionários</strong>
+                                <p class="text-xs mb-3 text-slate-500">É possível definir quais registros serão
+                                    considerados:</p>
+                                <ul class="space-y-3 text-xs">
+                                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                                        <div><strong class="text-slate-700 dark:text-slate-200">Todos</strong>
+                                            <p class="text-slate-500">Considera todos os funcionários sem movimento
+                                                conforme filtros.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                                        <div><strong class="text-slate-700 dark:text-slate-200">Excluir somente
+                                                dependentes</strong>
+                                            <p class="text-slate-500">Remove apenas dependentes sem movimentação.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                                        <div><strong class="text-slate-700 dark:text-slate-200">Excluir somente nomes
+                                                repetidos (últimos)</strong>
+                                            <p class="text-slate-500">Remove duplicados, mantendo o primeiro cadastro.
+                                            </p>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                                        <div><strong class="text-slate-700 dark:text-slate-200">Excluir somente CPFs
+                                                repetidos (últimos)</strong>
+                                            <p class="text-slate-500">Remove CPF duplicado, mantendo o primeiro
+                                                cadastro.</p>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-2"><i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                                        <div><strong class="text-slate-700 dark:text-slate-200">Limpar estoque no
+                                                name</strong>
+                                            <p class="text-slate-500">Remove registros residuais associados ao cadastro.
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div
+                                class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 rounded-r text-red-700 dark:text-red-300 text-xs">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Obs.:</strong>
+                                Recomendamos revisar os filtros antes da exclusão, pois o processo <u>remove
+                                    definitivamente</u> os registros que não possuem movimentação.
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Habilitar Múltiplos
+                                        Créditos (Conveniada)</h4>
+                                    <p class="text-xs text-slate-500">Configuração de parâmetros e cadastro.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-6">
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                                    1</div>
+                                <div>
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Configuração de Parâmetros
+                                        Globais</h5>
+                                    <p class="mb-2 text-slate-600 dark:text-slate-400">Primeiro, é necessário ativar os
+                                        parâmetros no nível da administradora e do grupo.</p>
+                                    <ul class="list-disc list-inside space-y-2 ml-1 text-slate-700 dark:text-slate-300">
+                                        <li>No <strong>Grupo de Administradora</strong>: Habilite o parâmetro <code
+                                                class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200">LIBERARCAMPOMULTIPLOSCREDITOS</code>
+                                        </li>
+                                        <li>Na <strong>Administradora</strong>: Habilite o parâmetro <code
+                                                class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-xs border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200">FLG_BOLETOADICIONAL</code>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm">
+                                    2</div>
+                                <div>
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Configuração no Cadastro
+                                    </h5>
+                                    <p class="mb-2 text-slate-600 dark:text-slate-400">Após ajustar os parâmetros,
+                                        realize a alteração na conveniada:</p>
+                                    <ol
+                                        class="list-decimal list-inside space-y-1 ml-1 text-slate-700 dark:text-slate-300">
+                                        <li>Acesse o <strong>Cadastro de Conveniadas</strong>.</li>
+                                        <li>Vá até a seção/aba <strong>Crédito</strong>.</li>
+                                        <li>Localize a opção <strong>Liberar lançamento de múltiplos créditos</strong>.
+                                        </li>
+                                        <li>Altere o valor para <strong class="text-green-600">SIM</strong>.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-3 rounded-r text-yellow-800 dark:text-yellow-200 text-xs font-medium">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Nota:</strong>
+                                Certifique-se de salvar as alterações em cada etapa para que a configuração tenha
+                                efeito.
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-code-branch"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Habilitar Webhook
+                                        Sicredi</h4>
+                                    <p class="text-xs text-slate-500">Configuração para baixa automática de boletos.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-6">
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-sm border border-green-200 dark:border-green-900">
+                                    1</div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Criar Usuário do Robô</h5>
+                                    <p class="mb-2 text-slate-600 dark:text-slate-400">Acesse a tela <code
+                                            class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-xs font-mono">/adm/cad_872</code>
+                                        na administradora ou grupo de administradoras e cadastre:</p>
+                                    <div
+                                        class="bg-slate-50 dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border mb-3">
+                                        <div class="flex justify-between items-center"><span
+                                                class="text-xs font-bold text-slate-500 uppercase">Nome de Usuário
+                                                (Login)</span><button
+                                                onclick="copyText(this, 'baixa.sicredi.automatica')"
+                                                class="text-xs text-brand-600 hover:text-brand-800 flex items-center gap-1"><i
+                                                    class="fa-regular fa-copy"></i> Copiar</button></div>
+                                        <code
+                                            class="block text-sm font-mono text-slate-800 dark:text-white mt-1">baixa.sicredi.automatica</code>
+                                    </div>
+                                    <div
+                                        class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-2 text-red-700 dark:text-red-300 text-xs">
+                                        <i class="fa-solid fa-circle-exclamation mr-1"></i> <strong>IMPORTANTE:</strong>
+                                        Após salvar, anote o <strong>CÓDIGO (ID)</strong> gerado pelo sistema para este
+                                        usuário. Você precisará dele no próximo passo.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-sm border border-green-200 dark:border-green-900">
+                                    2</div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Configurar Parâmetro</h5>
+                                    <p class="mb-2 text-slate-600 dark:text-slate-400">Se for Grupo, acesse <code
+                                            class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-xs font-mono">cad_909</code>.<br>Se
+                                        for Administradora, acesse <code
+                                            class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-xs font-mono">cad_906</code>.
+                                    </p>
+                                    <p class="text-slate-600 dark:text-slate-400 mb-2">Localize ou crie o parâmetro
+                                        abaixo:</p>
+                                    <div
+                                        class="bg-slate-50 dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                        <div class="mb-2"><span
+                                                class="text-[10px] text-slate-500 uppercase font-bold">Parâmetro</span>
+                                            <div class="flex items-center gap-2"><code
+                                                    class="text-xs font-mono text-blue-600 dark:text-blue-400 break-all">HABILITA_BAIXA_BOLETO_WEBHOOK</code><button
+                                                    onclick="copyText(this, 'HABILITA_BAIXA_BOLETO_WEBHOOK')"
+                                                    class="text-slate-400 hover:text-brand-600"><i
+                                                        class="fa-regular fa-copy text-xs"></i></button></div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div><span class="text-[10px] text-slate-500 uppercase font-bold">Campo 1
+                                                    (Habilita)</span>
+                                                <div class="font-bold text-green-600">SIM</div>
+                                            </div>
+                                            <div><span class="text-[10px] text-slate-500 uppercase font-bold">Campo 2
+                                                    (Valor)</span>
+                                                <div
+                                                    class="font-bold text-slate-800 dark:text-white text-xs bg-yellow-100 dark:bg-yellow-900/40 px-2 py-0.5 rounded inline-block">
+                                                    CÓDIGO DO USUÁRIO</div>
+                                                <div class="text-[10px] text-slate-400 mt-0.5">(Código numérico obtido
+                                                    no passo 1)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-key"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Recuperação de Senha
+                                        (Pay/Util)</h4>
+                                    <p class="text-xs text-slate-500">Procedimento via Logs no Monitoramento.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-2">
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Acesse o <strong>Monitoramento > Gerenciamento de Aplicações</strong>.</li>
+                                <li>Filtre por <strong>"Convcard Pay"</strong> e abra a aplicação <strong>"API Gateway
+                                        MSG"</strong>.</li>
+                                <li>Em outra aba, acesse o site do Pay, coloque o CNPJ e clique em "Recuperar Senha".
+                                </li>
+                                <li>Volte ao log, copie a URL de recuperação gerada.</li>
+                                <li>Acesse a URL e altere a senha para <strong
+                                        class="select-all text-red-500">1234</strong>.</li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-gray-100 text-gray-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Outros Procedimentos
+                                        Rápidos e Informações</h4>
+                                    <p class="text-xs text-slate-500">Remessa, Histórico e Tipos de Rede.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div><strong class="block mb-1">Para gerar remessa de crédito:</strong>
+                                <ul class="list-disc list-inside text-xs">
+                                    <li>Verificar se banco está cadastrado na tela <code
+                                            class="bg-gray-200 px-1 rounded">/adm/cad_925</code>.</li>
+                                    <li>Sequencial deve iniciar com 1 (tabela cadrbcrd).</li>
+                                    <li>Contas a pagar baixado.</li>
+                                </ul>
+                            </div>
+                            <div class="h-px bg-slate-200 dark:border-dark-border"></div>
+                            <div><strong class="block mb-1">Tipos de Rede:</strong>
+                                <ul class="list-disc list-inside text-xs">
+                                    <li><strong>PAT:</strong> Pagamento Antecipado (Pré-pago).</li>
+                                    <li><strong>Convênio:</strong> Crédito liberado na data estipulada.</li>
+                                </ul>
+                            </div>
+                            <div class="h-px bg-slate-200 dark:border-dark-border"></div>
+                            <div><strong class="block mb-1">Configurar Histórico (Trier):</strong>
+                                <p class="text-xs">Financeiro > Caixas > Cadastro > Histórico: Verifique nº da
+                                    ENTRADA.<br>Diversos > Config > "Gerar recebimento Cartão PF no Caixa": SIM. "Cód
+                                    Histórico": Nº da ENTRADA.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Configuração Quicktext
+                                        (E-mails Padrão)</h4>
+                                    <p class="text-xs text-slate-500">Instalação da extensão e importação dos modelos de
+                                        resposta para o Thunderbird.</p>
+                                </div>
+                            </div>
+                            <i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-6">
+
+                            <div
+                                class="bg-cyan-50 dark:bg-cyan-900/10 border border-cyan-100 dark:border-cyan-900/30 p-4 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+                                <div>
+                                    <strong class="text-cyan-800 dark:text-cyan-200 block mb-1">Arquivo de
+                                        Configuração</strong>
+                                    <p class="text-xs text-cyan-600 dark:text-cyan-400">Baixe o arquivo XML com as
+                                        respostas prontas antes de iniciar.</p>
+                                </div>
+                                <a href="https://drive.google.com/file/d/1-cVGOoOThCsC5ZWLGqWs6BQs5xFYGXk0/view?usp=sharing"
+                                    target="_blank" download
+                                    class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-download"></i> Baixar Modelos
+                                </a>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-300 dark:border-slate-600">
+                                    1</div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Instalar a Extensão</h5>
+                                    <ol
+                                        class="list-decimal list-inside space-y-1 ml-1 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                                        <li>No Thunderbird, clique na <strong>Engrenagem (Configurações)</strong> <span
+                                                class="text-slate-400">(canto inferior esquerdo)</span>.</li>
+                                        <li>Selecione <strong>"Extensões e Temas"</strong>.</li>
+                                        <li>Na barra de pesquisa, digite <code
+                                                class="bg-slate-200 dark:bg-slate-800 px-1 rounded font-mono text-cyan-600">Quicktext</code>.
+                                        </li>
+                                        <li>Vai abrir uma nova aba. Clique no botão verde <strong>"Adicionar ao
+                                                Thunderbird"</strong> e confirme a instalação.</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <div
+                                    class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-sm border border-slate-300 dark:border-slate-600">
+                                    2</div>
+                                <div class="flex-1">
+                                    <h5 class="font-bold text-slate-900 dark:text-white mb-2">Importar os Modelos</h5>
+                                    <ol
+                                        class="list-decimal list-inside space-y-1 ml-1 text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                                        <li>Após instalar, clique no ícone do <strong>Quicktext</strong> que apareceu no
+                                            topo do Thunderbird.</li>
+                                        <li>Na janela que abrir, vá na aba <strong>"Geral"</strong>.</li>
+                                        <li>Clique no botão <strong>Importar</strong> (lado direito).</li>
+                                        <li>Navegue até a pasta onde você baixou o arquivo e selecione-o.</li>
+                                        <li>Pronto! As respostas aparecerão na tela de composição de e-mail.</li>
+                                    </ol>
+                                </div>
+                            </div>
+
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                                    <i class="fa-solid fa-file-circle-xmark"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">Cancelamento de Boleto / Permissão</h4>
+                                    <p class="text-xs text-slate-500">Configuração do parâmetro FLG_LIBCANCELBOLCONV.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div>
+                                <p class="mb-2">A liberação deve ser feita pela <strong>Tela de Parâmetros</strong>. O parâmetro pode ser ativado tanto para o <strong>Grupo de Conveniada</strong> quanto para a <strong>Conveniada</strong>.</p>
+                                <div
+                                    class="bg-slate-100 dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-dark-border mb-4">
+                                    <span class="text-[10px] text-slate-500 uppercase font-bold">Parâmetro</span>
+                                    <div class="flex items-center gap-2">
+                                        <code class="text-xs font-mono text-blue-600 dark:text-blue-400 break-all">FLG_LIBCANCELBOLCONV</code>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white dark:bg-dark-surface p-4 rounded border border-slate-200 dark:border-dark-border">
+                                    <strong class="block mb-2 text-xs uppercase text-slate-500 tracking-wider">Campo 1</strong>
+                                    <h5 class="font-bold text-slate-800 dark:text-slate-200 mb-2">CONV. PERMIT. SOLICITA CANC. BOLETO</h5>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400">Serve para liberar ou desativar a conveniada de realizar a <strong>solicitação</strong> de cancelamento do boleto para a Administradora.</p>
+                                </div>
+                                <div class="bg-white dark:bg-dark-surface p-4 rounded border border-slate-200 dark:border-dark-border">
+                                    <strong class="block mb-2 text-xs uppercase text-slate-500 tracking-wider">Campo 2</strong>
+                                    <h5 class="font-bold text-slate-800 dark:text-slate-200 mb-2">PERMITE CONVENIADA EXCLUIR BOLETO REGISTRADO DIRETAMENTE</h5>
+                                    <p class="text-xs text-slate-600 dark:text-slate-400">Se ativo, permite que a própria conveniada <strong>realize o cancelamento</strong> do boleto de forma direta.</p>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-3 rounded-r text-yellow-800 dark:text-yellow-200 text-xs font-medium mt-4">
+                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> <strong>Atenção:</strong> A conveniada só conseguirá realizar o cancelamento se o boleto <strong>não estiver liquidado</strong>.
+                            </div>
+                        </div>
+                    </details>
+                    </div>
+            </section>
+
+            <section id="parametros">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-sliders text-pink-600"></i> Parâmetros do Sistema</h2>
+                <div class="space-y-4">
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        HABILITA_COMPROVANTE_MOVIMENTO_APP</h4>
+                                    <p class="text-xs text-slate-500 truncate">Habilita captura de notas fiscais no
+                                        App (Despesas).</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-5">
+                            <div
+                                class="flex flex-col gap-2 bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="flex items-center gap-2 mb-1"><span
+                                        class="bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 text-[10px] font-bold px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800 uppercase">Módulo
+                                        Despesas Corporativas</span></div>
+                                <div class="flex items-center justify-between">
+                                    <div
+                                        class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                        HABILITA COMPROVANTE MOVIMENTO APP</div><button
+                                        onclick="copyText(this, 'HABILITA COMPROVANTE MOVIMENTO APP')"
+                                        class="text-slate-400 hover:text-brand-600 transition-colors"
+                                        title="Copiar nome"><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                            </div>
+                            <div><strong
+                                    class="block mb-2 text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Níveis
+                                    de Aplicação</strong>
+                                <div class="flex flex-wrap gap-2"><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">Grupo
+                                        de Administradora</span><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Administradora</span><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Grupo
+                                        de Conveniada</span><span
+                                        class="px-2 py-1 rounded text-[10px] font-bold bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 border border-teal-200 dark:border-teal-800">Conveniada</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-yellow-50 dark:bg-yellow-900/10 p-4 rounded-lg border border-yellow-100 dark:border-yellow-900/20 space-y-3">
+                                <div><strong class="block text-slate-800 dark:text-white mb-1"><i
+                                            class="fa-solid fa-business-time text-slate-400 mr-1"></i> Cenário de
+                                        Uso</strong>
+                                    <p class="leading-relaxed text-slate-600 dark:text-slate-400 text-xs">Ideal para
+                                        colaboradores em <strong>viagens de negócios</strong> ou que realizam compras
+                                        corporativas. Elimina a necessidade de guardar notas físicas para entregar
+                                        posteriormente.</p>
+                                </div>
+                                <div class="h-px bg-yellow-200 dark:border-yellow-900/30"></div>
+                                <div><strong class="block text-slate-800 dark:text-white mb-1"><i
+                                            class="fa-solid fa-mobile-screen text-slate-400 mr-1"></i> Como Funciona
+                                        no App</strong>
+                                    <p class="leading-relaxed text-slate-600 dark:text-slate-400 text-xs">Ao definir
+                                        como <span class="font-bold text-green-600">SIM</span>, o aplicativo libera um
+                                        botão de câmera na tela de movimentação.</p>
+                                    <ul
+                                        class="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-400 list-disc list-inside">
+                                        <li>O usuário fotografa a nota fiscal/recibo na hora da compra.</li>
+                                        <li>A imagem é enviada automaticamente para o sistema.</li>
+                                        <li>O RH ou gestor financeiro visualiza o comprovante instantaneamente para
+                                            conciliação.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-regular fa-credit-card"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_USUARIO_CARTAO_VITUAL</h4>
+                                    <p class="text-xs text-slate-500 truncate">Habilita/Desabilita módulo de Cartão
+                                        Virtual.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_USUARIO_CARTAO_VITUAL</div><button
+                                    onclick="copyText(this, 'FLG_USUARIO_CARTAO_VITUAL')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-100 dark:border-blue-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-toggle-off text-slate-400 mr-1"></i> Comportamento Padrão:
+                                    ATIVADO</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-2">O cartão
+                                    virtual vem habilitado nativamente. Utilize este parâmetro apenas se a empresa
+                                    solicitar o bloqueio.</p>
+                                <div
+                                    class="text-xs bg-white dark:bg-dark-surface p-2 rounded border border-blue-200 dark:border-blue-800 text-slate-500">
+                                    Para desativar: Preencher o campo valor com <strong
+                                        class="text-red-600">NÃO</strong>.</div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-slate-100 text-slate-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_USUARIO_QR_CODE</h4>
+                                    <p class="text-xs text-slate-500 truncate">Habilita/Desabilita vendas via QR Code.
+                                    </p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_USUARIO_QR_CODE</div><button onclick="copyText(this, 'FLG_USUARIO_QR_CODE')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-ban text-slate-400 mr-1"></i> Bloqueio de
+                                    Funcionalidade</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Seguindo a
+                                    lógica do cartão virtual, algumas conveniadas não autorizam o uso de QR Code. Para
+                                    remover a opção do App do usuário, configure o parâmetro com valor <strong
+                                        class="text-red-600">NÃO</strong>.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-calendar-xmark"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_NAOEXIBCREDEXP (CAD_748)</h4>
+                                    <p class="text-xs text-slate-500 truncate">Inibir lançamento de créditos expirados.
+                                    </p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_NAOEXIBCREDEXP</div><button onclick="copyText(this, 'FLG_NAOEXIBCREDEXP')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg border border-red-100 dark:border-red-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-triangle-exclamation text-red-400 mr-1"></i> Restrição
+                                    Operacional</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Utilizado para
+                                    inibir o lançamento de créditos expirados através da tela <code
+                                        class="bg-white dark:bg-slate-700 px-1 rounded">crt/grupoadmin/cad_748</code>.
+                                    Geralmente solicitado via ticket para impedir operações retroativas indevidas.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-file-arrow-up"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_LIBERATELAIMPOR</h4>
+                                    <p class="text-xs text-slate-500 truncate">Libera tela de Importação Centralizada.
+                                    </p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_LIBERATELAIMPOR</div><button onclick="copyText(this, 'FLG_LIBERATELAIMPOR')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-green-50 dark:bg-green-900/10 p-4 rounded-lg border border-green-100 dark:border-green-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-check-circle text-green-500 mr-1"></i> Finalidade</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-2">Habilita a
+                                    visualização das telas para Importação Centralizada no módulo da conveniada.</p>
+                                <div
+                                    class="flex gap-2 items-start bg-white dark:bg-dark-surface p-2 rounded border border-green-200 dark:border-green-800">
+                                    <i class="fa-solid fa-triangle-exclamation text-orange-500 mt-0.5 text-xs"></i><span
+                                        class="text-xs text-slate-500"><strong>Obs.:</strong> Além do parâmetro, é
+                                        necessário liberar as permissões de tela manualmente no cadastro de usuários
+                                        (<code class="font-mono">cad_872</code>). Mas isso quem realiza é a própria
+                                        administradora.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-eye"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_EXIBENUMCARTAO</h4>
+                                    <p class="text-xs text-slate-500 truncate">Exibe numeração sem máscara (Relatórios).
+                                    </p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_EXIBENUMCARTAO</div><button onclick="copyText(this, 'FLG_EXIBENUMCARTAO')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-unlock text-indigo-400 mr-1"></i> Segurança da
+                                    Informação</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Por padrão, os
+                                    relatórios exibem o número do cartão mascarado (ex: 639321********1234) por
+                                    segurança.
+                                    Ativar este parâmetro remove a máscara, exibindo a numeração completa no módulo
+                                    Conveniada.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-orange-100 text-orange-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-clone"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_CNPJDUPLO (CAD_863)</h4>
+                                    <p class="text-xs text-slate-500 truncate">Permite duplicar o CNPJ/CPF no cadastro.
+                                    </p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_CNPJDUPLO</div><button onclick="copyText(this, 'FLG_CNPJDUPLO')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-lg border border-orange-100 dark:border-orange-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-check-double text-orange-400 mr-1"></i> Permissão de
+                                    Duplicidade</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Ao definir como
+                                    <span class="font-bold text-green-600">SIM</span>, o sistema remove a trava de
+                                    unicidade, permitindo cadastrar uma nova Conveniada (na tela <code
+                                        class="bg-white dark:bg-slate-700 px-1 rounded">cad_863</code>) utilizando um
+                                    CNPJ ou CPF que já existe na base de dados.
+                                </p>
+                            </div>
+                        </div>
+                    </details>
+
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
+                                    <i class="fa-solid fa-store"></i>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm truncate pr-4">
+                                        FLG_CADMULTICRED</h4>
+                                    <p class="text-xs text-slate-500 truncate">Habilita cadastro múltiplo de
+                                        credenciadas.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180 flex-shrink-0"></i>
+                        </summary>
+                        <div
+                            class="p-6 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-700 dark:text-slate-300 space-y-4">
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                <div class="font-mono text-xs font-bold text-slate-700 dark:text-slate-200 select-all">
+                                    FLG_CADMULTICRED</div><button onclick="copyText(this, 'FLG_CADMULTICRED')"
+                                    class="text-slate-400 hover:text-brand-600 transition-colors"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                            <div
+                                class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-lg border border-emerald-100 dark:border-emerald-900/20">
+                                <strong class="block text-slate-800 dark:text-white mb-1"><i
+                                        class="fa-solid fa-layer-group text-emerald-500 mr-1"></i> Múltiplos
+                                    Vínculos</strong>
+                                <p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400">Este parâmetro
+                                    habilita a funcionalidade de criar múltiplos cadastros para a mesma rede de
+                                    credenciadas, facilitando a gestão de filiais ou pontos de venda distintos sob a
+                                    mesma administração.</p>
+                            </div>
+                        </div>
+                    </details>
+
+                </div>
+            </section>
+
+            <section id="ferramentas">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-screwdriver-wrench text-purple-600"></i> Ferramentas Diárias</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="https://trier.movidesk.com/Account/Login" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:shadow-sm transition-all group hover:border-brand-500">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-[#FF6600] flex items-center justify-center text-white text-lg shadow-sm flex-shrink-0">
+                            <i class="fa-solid fa-headset"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Movidesk</div>
+                            <div class="text-xs text-slate-500">Gestão de Chamados</div>
+                        </div>
+                    </a>
+                    <a href="https://sicfarma.triersistemas.com.br/#/login" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:shadow-sm transition-all group hover:border-emerald-500">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-lg shadow-sm flex-shrink-0">
+                            <i class="fa-solid fa-prescription-bottle-medical"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">SIC Farma</div>
+                            <div class="text-xs text-slate-500">Sistema Farma</div>
+                        </div>
+                    </a>
+                    <a href="https://webmail.triersistemas.com.br/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:shadow-sm transition-all group hover:border-blue-500">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm flex-shrink-0">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Webmail</div>
+                            <div class="text-xs text-slate-500">E-mail Corporativo</div>
+                        </div>
+                    </a>
+                    <a href="https://qa.convcard.com.br/monitoramento/#/login" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:shadow-sm transition-all group hover:border-red-500">
+                        <img src="https://www.google.com/s2/favicons?domain=zabbix.com&sz=128" alt="Monitoramento"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Monitoramento</div>
+                            <div class="text-xs text-slate-500">Dashboards</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="ambientes">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-globe text-brand-600"></i> Ambientes ConvCard</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <a href="https://site.convcard.com.br/crt/" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 hover:shadow-sm transition-all group">
+                        <div
+                            class="w-8 h-8 rounded bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200 flex items-center justify-center font-bold text-xs group-hover:bg-brand-600 group-hover:text-white transition-colors flex-shrink-0">
+                            CC</div><span class="text-sm font-medium text-slate-700 dark:text-slate-300">Convcard
+                            CRT</span>
+                    </a>
+                    <a href="https://site.convcard.com.br/crt01/" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 hover:shadow-sm transition-all group">
+                        <div
+                            class="w-8 h-8 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs group-hover:bg-brand-600 group-hover:text-white transition-colors flex-shrink-0">
+                            01</div><span class="text-sm font-medium text-slate-700 dark:text-slate-300">Convcard
+                            CRT01</span>
+                    </a>
+                    <a href="https://site.convcard.com.br/crt02/" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 hover:shadow-sm transition-all group">
+                        <div
+                            class="w-8 h-8 rounded bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 flex items-center justify-center font-bold text-xs group-hover:bg-brand-600 group-hover:text-white transition-colors flex-shrink-0">
+                            02</div><span class="text-sm font-medium text-slate-700 dark:text-slate-300">Convcard
+                            CRT02</span>
+                    </a>
+                    <a href="https://hml.convcard.com.br/" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-orange-500 hover:shadow-sm transition-all group relative">
+                        <div
+                            class="w-8 h-8 rounded bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-200 flex items-center justify-center text-xs group-hover:bg-orange-500 group-hover:text-white transition-colors flex-shrink-0">
+                            <i class="fa-solid fa-flask"></i>
+                        </div><span class="text-sm font-medium text-slate-700 dark:text-slate-300">Homologação</span>
+                        <div class="tooltip-text"><strong>Ambiente de Testes:</strong><br>Dados fictícios. Não gera
+                            cobrança real.</div>
+                    </a>
+                    <a href="https://www.convcard.com.br/crtpf/" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all"><i
+                            class="fa-solid fa-user text-slate-400"></i><span
+                            class="text-sm text-slate-700 dark:text-slate-300">Convcard PF</span></a>
+
+                    <a href="https://www.convcard.com.br/sgc/login/crt/portalrh" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all group relative">
+                        <i class="fa-solid fa-users text-slate-400"></i>
+                        <span class="text-sm text-slate-700 dark:text-slate-300">Convcard RH CRT</span>
+                        <div class="tooltip-text">
+                            <strong>Acesso Suporte:</strong><br>
+                            CNPJ: Da Loja<br>
+                            CPF Op: 000.000.001-91<br>
+                            Senha: joaozinho.fulano.convcard/suasenha
+                        </div>
+                    </a>
+
+                    <a href="https://www.convcard.com.br/sgc/login/crt01/portalrh" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all group relative">
+                        <i class="fa-solid fa-building-user text-slate-400"></i>
+                        <span class="text-sm text-slate-700 dark:text-slate-300">Convcard RH CRT01</span>
+                        <div class="tooltip-text">
+                            <strong>Acesso Suporte:</strong><br>
+                            CNPJ: Da Loja<br>
+                            CPF Op: 000.000.001-91<br>
+                            Senha: joaozinho.fulano.convcard/suasenha
+                        </div>
+                    </a>
+
+                    <a href="https://www.convcard.com.br/repasse/#/login" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all"><i
+                            class="fa-solid fa-money-bill-transfer text-slate-400"></i><span
+                            class="text-sm text-slate-700 dark:text-slate-300">Repasse</span></a>
+                    <a href="https://pay.convcard.com/pay/#/login" target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all group relative"><i
+                            class="fa-solid fa-credit-card text-slate-400"></i><span
+                            class="text-sm text-slate-700 dark:text-slate-300">Convcard Pay</span>
+                        <div class="tooltip-text"><strong>Credenciais Padrão:</strong><br>Login: CNPJ da
+                            credenciada<br>Senha: CNPJ (apenas números)</div>
+                    </a>
+                    <a href="https://portalrh.triersistemas.com.br/Portalrh/Account/Login?ReturnUrl=%2fPortalrh"
+                        target="_blank"
+                        class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border p-3 rounded-xl flex items-center gap-3 hover:border-brand-500 transition-all group relative"><i
+                            class="fa-solid fa-desktop text-slate-400"></i><span
+                            class="text-sm text-slate-700 dark:text-slate-300">Portal RH Trier</span>
+                        <div class="tooltip-text"><strong>Acesso Externo:</strong><br>Sistema de RH da Trier Sistemas.
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="downloads">
+                <div
+                    class="searchable-item bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center text-xl flex-shrink-0">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-800 dark:text-white">Repositório de Instalação (/pub)</h4>
+                            <p class="text-xs text-slate-500">Baixar POS Virtual, Gerenciador e Utilitários.</p><a
+                                href="http://convcard.com.br/pub" target="_blank"
+                                class="text-xs text-brand-600 font-bold hover:underline mt-1 inline-block">Acessar Pasta
+                                <i class="fa-solid fa-external-link-alt ml-1"></i></a>
+                        </div>
+                    </div>
+                    <div
+                        class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-dark-border">
+                        <div class="text-right border-r border-slate-200 dark:border-dark-border pr-4">
+                            <p class="text-[10px] text-slate-400 uppercase">Usuário</p><button
+                                onclick="copyText(this, 'convcard')"
+                                class="font-mono text-sm font-bold text-slate-700 dark:text-white hover:text-brand-500 flex items-center gap-2">convcard
+                                <i class="fa-regular fa-copy text-xs"></i></button>
+                        </div>
+                        <div class="pl-2">
+                            <p class="text-[10px] text-slate-400 uppercase">Senha</p><button
+                                onclick="copyText(this, 'integrador')"
+                                class="font-mono text-sm font-bold text-slate-700 dark:text-white hover:text-brand-500 flex items-center gap-2">integrador
+                                <i class="fa-regular fa-copy text-xs"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="softwares">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-laptop-file text-brand-600"></i> Softwares</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                    <a href="https://drive.google.com/file/d/1YCOmA0r8FBGlraU6oRPl5vLOw7beAbtU/view?usp=sharing"
+                        target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-red-200 dark:border-red-900/30 flex items-center gap-4 hover:border-red-500 hover:shadow-sm transition-all group relative overflow-hidden">
+                        <div
+                            class="absolute right-0 top-0 bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-bl">
+                            VERSÃO ANTIGA</div><img src="https://www.google.com/s2/favicons?domain=anydesk.com&sz=128"
+                            alt="AnyDesk" class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">AnyDesk Legacy</div>
+                            <div class="text-xs text-slate-500 flex items-center gap-1"><i
+                                    class="fa-brands fa-google-drive"></i> Link do Drive</div>
+                        </div>
+                        <div class="tooltip-text"><strong>Compatibilidade:</strong><br>Versão 6.x. Use apenas se a
+                            versão atual falhar.</div>
+                    </a>
+                    <a href="https://openvpn.net/client-connect-vpn-for-windows/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-orange-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=openvpn.net&sz=128" alt="OpenVPN"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">OpenVPN Connect</div>
+                            <div class="text-xs text-slate-500">Acesso Rede Interna</div>
+                        </div>
+                    </a>
+                    <a href="https://www.teamviewer.com/pt-br/download/windows/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-blue-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=teamviewer.com&sz=128" alt="TeamViewer"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">TeamViewer</div>
+                            <div class="text-xs text-slate-500">Suporte Remoto</div>
+                        </div>
+                    </a>
+                    <a href="https://www.postman.com/downloads/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-orange-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=postman.com&sz=128" alt="Postman"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Postman</div>
+                            <div class="text-xs text-slate-500">Testes de API</div>
+                        </div>
+                    </a>
+                    <a href="https://filezilla-project.org/download.php?type=client" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-red-500 hover:shadow-sm transition-all group relative">
+                        <img src="https://www.google.com/s2/favicons?domain=filezilla-project.org&sz=128"
+                            alt="FileZilla" class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">FileZilla</div>
+                            <div class="text-xs text-slate-500">Cliente SFTP</div>
+                        </div>
+                        <div class="tooltip-text"><strong>Conciliação Financeira:</strong><br>Utilizado para envio de
+                            arquivos de conciliação via SFTP.</div>
+                    </a>
+                    <a href="https://www.microsip.org/downloads" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-green-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=microsip.org&sz=128" alt="MicroSIP"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">MicroSIP</div>
+                            <div class="text-xs text-slate-500">Ramal VoIP</div>
+                        </div>
+                    </a>
+                    <a href="https://www.thunderbird.net/pt-BR/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-blue-400 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=thunderbird.net&sz=128" alt="Thunderbird"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Thunderbird</div>
+                            <div class="text-xs text-slate-500">Cliente de E-mail</div>
+                        </div>
+                    </a>
+                    <a href="https://app.prntscr.com/pt-br/download.html" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-purple-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=prntscr.com&sz=128" alt="Lightshot"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Lightshot</div>
+                            <div class="text-xs text-slate-500">Printscreen</div>
+                        </div>
+                    </a>
+                    <a href="https://notepad-plus-plus.org/downloads/" target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-slate-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.google.com/s2/favicons?domain=notepad-plus-plus.org&sz=128"
+                            alt="Notepad++" class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Notepad++</div>
+                            <div class="text-xs text-slate-500">Editor de Texto</div>
+                        </div>
+                    </a>
+                    <a href="https://drive.google.com/file/d/11JRcuqB_IqmKLDCzj5yRWX_E9LQHBugD/view?usp=sharing"
+                        target="_blank"
+                        class="searchable-item p-4 rounded-xl bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border flex items-center gap-4 hover:border-brand-500 hover:shadow-sm transition-all group">
+                        <img src="https://www.convcard.com.br/sgc/favicon.ico" alt="Conversor Layout"
+                            class="w-8 h-8 app-logo flex-shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white">Conversor de Layout</div>
+                            <div class="text-xs text-slate-500">Ferramenta Interna</div>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section id="contatos">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2"><i
+                        class="fa-solid fa-address-book text-brand-600"></i> Diretório de Contatos</h2>
+                <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mb-3">Parceiros & Sistemas
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm border-l-4 border-l-blue-500">
+                        <span class="font-bold text-slate-800 dark:text-white">Ramal TRIER</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">*11001</span><button
+                                onclick="copyText(this, '*11001')" class="text-slate-400 hover:text-brand-600"><i
+                                    class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Logtec</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">(48)
+                                3658-9860</span><button onclick="copyText(this, '4836589860')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Convcard (Geral)</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">(48)
+                                3658-9820</span><button onclick="copyText(this, '4836589820')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mb-3">Clientes & Associações
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Conviva</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">(85)
+                                3214-4000</span><button onclick="copyText(this, '8532144000')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">FACISC (Útil)</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">48
+                                3952-8844</span><button onclick="copyText(this, '4839528844')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Masterfarma (Convnet)</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">48
+                                3437-7363</span><button onclick="copyText(this, '4834377363')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">ACIC Criciúma</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">48
+                                3461-0900</span><button onclick="copyText(this, '4834610900')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">100% Trabalhador</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">48
+                                9916-8635</span><button onclick="copyText(this, '4899168635')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Sindicato Mineiros</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">48
+                                3433-2459</span><button onclick="copyText(this, '4834332459')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div
+                        class="searchable-item p-4 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl flex flex-col gap-2 shadow-sm">
+                        <span class="font-bold text-slate-800 dark:text-white">Facer</span>
+                        <div
+                            class="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-100 dark:border-dark-border">
+                            <span class="font-mono text-sm text-slate-600 dark:text-slate-300">69
+                                3229-8957</span><button onclick="copyText(this, '6932298957')"
+                                class="text-slate-400 hover:text-brand-600"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase mb-3">Prestadores de Serviço
+                </h3>
+                <div class="space-y-3">
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
+                                    F</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">FISERV / SOFTWARE HOUSE
+                                    </h4>
+                                    <p class="text-xs text-slate-500">Integração TEF e automações.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300 space-y-4">
+                            <div><strong class="text-slate-800 dark:text-white block mb-1">Quando acionar:</strong>
+                                <p>Problemas na integração com TEF, vendas não processando.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div
+                                    class="bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                    <strong class="block mb-2 text-orange-600">Command Center (24h)</strong>
+                                    <p>Pedro Henrique Mello Duarte</p>
+                                    <p class="font-mono text-xs mt-1">011 3631-1458</p>
+                                    <p class="font-mono text-xs">LATAM.CommandCenter.Brasil@fiserv.com</p>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                    <strong class="block mb-2 text-blue-600">Comercial</strong>
+                                    <p>Jonatas Ramos Junior</p>
+                                    <p class="font-mono text-xs mt-1">011 97693-7027</p>
+                                    <p class="font-mono text-xs">jonatas.ramosjunior@Fiserv.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                                    L</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">LINX / DTEF</h4>
+                                    <p class="text-xs text-slate-500">Solução DTEF e automações.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300 space-y-4">
+                            <div><strong class="text-slate-800 dark:text-white block mb-1">Quando acionar:</strong>
+                                <p>Falhas em vendas via DTEF, erros de integração.</p>
+                            </div>
+                            <ul class="space-y-2">
+                                <li class="flex flex-col"><span class="font-bold">Vinicius Pirola (Suporte):</span><span
+                                        class="font-mono text-xs">011 99161-0915 | vinicius.campos@linx.com.br</span>
+                                </li>
+                                <li class="flex flex-col"><span class="font-bold">Felipe Bizari (Rede/VPN):</span> <span
+                                        class="font-mono text-xs">011 94550-9733 | felipe.bizari@linx.com.br</span></li>
+                                <li class="flex flex-col"><span class="font-bold">Luiz Camargo (Coord. VPN):</span><span
+                                        class="font-mono text-xs">011 99119-2873 | luiz.camargo@linx.com.br</span></li>
+                            </ul>
+                        </div>
+                    </details>
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold">
+                                    T</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">TOPMED (Telemedicina)
+                                    </h4>
+                                    <p class="text-xs text-slate-500">Integração API, Webhooks e Atendimento.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300 space-y-4">
+                            <div
+                                class="bg-red-50 dark:bg-red-900/20 p-3 rounded border border-red-100 dark:border-red-900/30">
+                                <strong class="text-red-700 dark:text-red-400 text-xs block mb-1">Checklist Obrigatório
+                                    (TI):</strong>
+                                <p class="text-xs">CNPJ/ID, Endpoint, Horário (UTC-3), Status Code, Logs/Print.</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div><strong class="block mb-1 text-slate-800 dark:text-white">TI / Integrações</strong>
+                                    <p class="font-mono text-xs">ti.topmed@topmed.com.br</p>
+                                    <p class="font-mono text-xs">048 3964-8143</p>
+                                </div>
+                                <div><strong class="block mb-1 text-slate-800 dark:text-white">Customer Success</strong>
+                                    <p class="font-mono text-xs">cs@topmed.com.br</p>
+                                    <p class="font-mono text-xs">048 99185-8948</p>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
+                                    R</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">RV Recargas</h4>
+                                    <p class="text-xs text-slate-500">Recargas de celular e pré-pagos.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300">
+                            <ul class="space-y-2 font-mono text-xs">
+                                <li>Marlon (Comercial): 051 98184-1692</li>
+                                <li>Christian (Suporte): 031 99754-8028</li>
+                                <li>Davidson (Suporte DSC): 031 99696-6997</li>
+                            </ul>
+                        </div>
+                    </details>
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                                    E</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">ELO / CIELO (Resomaq)
+                                    </h4>
+                                    <p class="text-xs text-slate-500">Maquininhas e Processamento.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300 space-y-4">
+                            <div><strong
+                                    class="text-slate-800 dark:text-white block mb-2 text-xs uppercase font-bold tracking-wider">Contatos
+                                    Diretos</strong>
+                                <ul class="space-y-1 font-mono text-xs">
+                                    <li>Vinicius (Proprietário): 011 99906-4812</li>
+                                    <li>Gilberto Jr (Dev): 011 97200-2481</li>
+                                    <li>Matheus Flores (Dev): 011 99606-4553</li>
+                                </ul>
+                            </div>
+                            <div class="h-px bg-slate-200 dark:border-dark-border"></div>
+                            <div><strong
+                                    class="text-slate-800 dark:text-white block mb-2 text-xs uppercase font-bold tracking-wider">Sistema
+                                    de Chamados</strong>
+                                <div
+                                    class="bg-white dark:bg-dark-surface p-3 rounded border border-slate-200 dark:border-dark-border">
+                                    <p class="text-xs mb-2 font-medium">Passo a passo para acessar o TomTicket:</p>
+                                    <ol
+                                        class="list-decimal list-inside text-xs space-y-2 mb-3 text-slate-700 dark:text-slate-300">
+                                        <li>Acesse o link: <a href="https://resomaq.tomticket.com/" target="_blank"
+                                                class="text-blue-600 hover:text-blue-800 font-bold hover:underline">resomaq.tomticket.com
+                                                <i class="fa-solid fa-external-link-alt text-[10px] ml-1"></i></a></li>
+                                        <li>Clique na opção <strong>"Recuperar senha"</strong>.</li>
+                                        <li>Informe o e-mail cadastrado e clique no botão para confirmar.</li>
+                                        <li>Acesse seu e-mail e realize o recadastramento da senha.</li>
+                                    </ol>
+                                    <div
+                                        class="bg-blue-50 dark:bg-blue-900/20 p-2 rounded text-[11px] text-blue-800 dark:text-blue-300 border border-blue-100 dark:border-blue-900/30 flex gap-2">
+                                        <i class="fa-solid fa-circle-info mt-0.5"></i><span>Após estes passos, basta
+                                            acessar a plataforma e criar os chamados quando necessário. Estamos à
+                                            disposição.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <details
+                        class="searchable-item group bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-sm">
+                        <summary
+                            class="flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded bg-green-100 text-green-600 flex items-center justify-center font-bold">
+                                    S</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 dark:text-white text-sm">SICREDI (PIX)</h4>
+                                    <p class="text-xs text-slate-500">Falhas no QR Code ou processamento.</p>
+                                </div>
+                            </div><i
+                                class="fa-solid fa-chevron-down text-slate-400 text-xs transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div
+                            class="p-4 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-[#151e2e] text-sm text-slate-600 dark:text-slate-300">
+                            <p class="mb-2"><strong>Suporte Dedicado:</strong> Maria Eduarda Baldisserra</p>
+                            <div
+                                class="flex items-center justify-between bg-white dark:bg-dark-surface p-2 rounded border border-slate-200 dark:border-dark-border">
+                                <span class="font-mono text-xs">051 9832-0012</span><button
+                                    onclick="copyText(this, '05198320012')"
+                                    class="text-slate-400 hover:text-brand-600"><i
+                                        class="fa-regular fa-copy"></i></button>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="snakeWidget"
+        class="fixed bottom-20 left-4 z-[60] hidden flex flex-col gap-3 p-4 rounded-2xl border border-white/40 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-[260px] transform transition-all duration-300 origin-bottom-left scale-95 opacity-0 translate-y-4">
+
+        <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-700/50 pb-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">ConvSnake
+                </h3>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="font-mono text-xs font-bold text-brand-600 dark:text-brand-400">PTS: <span
+                        id="scoreVal">0</span></span>
+                <button onclick="toggleSnakeGame()" class="text-slate-400 hover:text-red-500 transition-colors"><i
+                        class="fa-solid fa-times"></i></button>
+            </div>
+        </div>
+
+        <canvas id="snakeCanvas" width="225" height="225"
+            class="bg-slate-100 dark:bg-[#0b1120] rounded-lg mx-auto block w-full"></canvas>
+
+        <p class="text-center text-[10px] text-slate-400 font-mono opacity-70">Setas para jogar</p>
+    </div>
+
+    <script>
+        function copyText(element, text) {
+            navigator.clipboard.writeText(text);
+            const icon = element.querySelector('i');
+            icon.className = 'fa-solid fa-check text-green-400';
+
+            // Se for botão de contato, feedback diferente
+            if (element.tagName === 'BUTTON') {
+                element.classList.add('text-green-500');
+            }
+
+            setTimeout(() => {
+                icon.className = 'fa-regular fa-copy'; // Reset simples
+                if (element.tagName === 'BUTTON') {
+                    element.classList.remove('text-green-500');
+                    element.classList.add('text-slate-400');
+                }
+            }, 2000);
+        }
+
+        function filterCards() {
+            const query = document.getElementById('globalSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.searchable-item');
+            items.forEach(item => {
+                if (item.textContent.toLowerCase().includes(query)) {
+                    item.style.display = "";
+                    item.classList.remove('opacity-25', 'grayscale');
+                    // Se for um detalhe (accordion), abre se tiver match
+                    if (item.tagName === 'DETAILS' && query.length > 0) {
+                        item.open = true;
+                    }
+                } else {
+                    item.classList.add('opacity-25', 'grayscale');
+                }
+            });
+        }
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // --- CÓDIGO DO EFEITO 3D (TILT) ---
+        const cards = document.querySelectorAll('.searchable-item');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Calcula brilho e rotação
+                card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+                card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -3; // Inclinação suave
+                const rotateY = ((x - centerX) / centerX) * 3;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.01, 1.01, 1.01)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            });
+        });
+
+        // --- LÓGICA DO JOGO SNAKE (WIDGET COMPACTO) ---
+        let clickCount = 0;
+        let gameInterval;
+        const trigger = document.getElementById('versionTrigger');
+        const widget = document.getElementById('snakeWidget'); // Mudou de modal para widget
+        const canvas = document.getElementById('snakeCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Configurações para o tamanho menor (225px)
+        const box = 15;
+        const canvasSize = 225; // 15 blocos * 15px
+
+        let snake = [];
+        let score = 0;
+        let d;
+        let food;
+
+        // Gatilho: 3 cliques na versão
+        if (trigger) {
+            trigger.addEventListener('click', () => {
+                clickCount++;
+                if (clickCount === 3) {
+                    clickCount = 0;
+                    toggleSnakeGame();
+                }
+                setTimeout(() => clickCount = 0, 2000);
+            });
+        }
+
+        function toggleSnakeGame() {
+            if (widget.classList.contains('hidden')) {
+                // ABRIR
+                widget.classList.remove('hidden');
+                // Pequeno delay para permitir a transição CSS
+                setTimeout(() => {
+                    widget.classList.remove('scale-95', 'opacity-0', 'translate-y-4');
+                    widget.classList.add('scale-100', 'opacity-100', 'translate-y-0');
+                }, 10);
+                startGame();
+            } else {
+                // FECHAR
+                widget.classList.remove('scale-100', 'opacity-100', 'translate-y-0');
+                widget.classList.add('scale-95', 'opacity-0', 'translate-y-4');
+
+                setTimeout(() => {
+                    widget.classList.add('hidden');
+                }, 300); // Espera a animação acabar
+                clearInterval(gameInterval);
+            }
+        }
+
+        document.addEventListener("keydown", direction);
+        function direction(event) {
+            let key = event.keyCode;
+            // Impede rolagem apenas se o widget estiver visível
+            if (!widget.classList.contains('hidden') && [37, 38, 39, 40].includes(key)) {
+                event.preventDefault();
+            }
+            if (key == 37 && d != "RIGHT") d = "LEFT";
+            else if (key == 38 && d != "DOWN") d = "UP";
+            else if (key == 39 && d != "LEFT") d = "RIGHT";
+            else if (key == 40 && d != "UP") d = "DOWN";
+        }
+
+        function collision(head, array) {
+            for (let i = 0; i < array.length; i++) {
+                if (head.x == array[i].x && head.y == array[i].y) return true;
+            }
+            return false;
+        }
+
+        function draw() {
+            // Fundo
+            ctx.fillStyle = document.documentElement.classList.contains('dark') ? "#0b1120" : "#f1f5f9";
+            ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+            for (let i = 0; i < snake.length; i++) {
+                // Cores da cobrinha (Brand)
+                ctx.fillStyle = (i == 0) ? "#0ea5e9" : "#38bdf8";
+                ctx.fillRect(snake[i].x, snake[i].y, box, box);
+
+                // Borda da cobrinha para separar gomos
+                ctx.strokeStyle = document.documentElement.classList.contains('dark') ? "#0b1120" : "#f1f5f9";
+                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+            }
+
+            // Comida
+            ctx.fillStyle = "#ef4444";
+            // Desenha comida circular
+            ctx.beginPath();
+            ctx.arc(food.x + box / 2, food.y + box / 2, box / 2.5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            if (d == "LEFT") snakeX -= box;
+            if (d == "UP") snakeY -= box;
+            if (d == "RIGHT") snakeX += box;
+            if (d == "DOWN") snakeY += box;
+
+            // Logica da Comida
+            if (snakeX == food.x && snakeY == food.y) {
+                score++;
+                document.getElementById('scoreVal').innerText = score;
+                // Gera comida em posição aleatória (0 a 14 pois 225/15 = 15)
+                food = {
+                    x: Math.floor(Math.random() * (canvasSize / box)) * box,
+                    y: Math.floor(Math.random() * (canvasSize / box)) * box
+                }
+            } else {
+                snake.pop();
+            }
+
+            let newHead = { x: snakeX, y: snakeY };
+
+            // Colisão
+            if (snakeX < 0 || snakeX >= canvasSize || snakeY < 0 || snakeY >= canvasSize || collision(newHead, snake)) {
+                clearInterval(gameInterval);
+                ctx.fillStyle = document.documentElement.classList.contains('dark') ? "#fff" : "#1e293b";
+                ctx.font = "bold 20px 'JetBrains Mono'";
+                ctx.textAlign = "center";
+                ctx.fillText("GAME OVER", canvasSize / 2, canvasSize / 2);
+                ctx.font = "12px 'Inter'";
+                ctx.fillStyle = "#94a3b8";
+                ctx.fillText("Tecle F5 ou reabra", canvasSize / 2, (canvasSize / 2) + 20);
+            }
+
+            snake.unshift(newHead);
+        }
+
+        function startGame() {
+            snake = [];
+            // Inicia no meio (aprox 7 * 15)
+            snake[0] = { x: 7 * box, y: 7 * box };
+            score = 0;
+            document.getElementById('scoreVal').innerText = score;
+            d = "";
+            food = {
+                x: Math.floor(Math.random() * (canvasSize / box)) * box,
+                y: Math.floor(Math.random() * (canvasSize / box)) * box
+            }
+            clearInterval(gameInterval);
+            gameInterval = setInterval(draw, 100); // Velocidade
+        }
+    </script>
+</body>
+
+</html>
